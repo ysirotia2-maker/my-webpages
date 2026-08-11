@@ -1,29 +1,66 @@
-<HTML>
-<head> <title> Welcome to my domain </title>
-<style>
-  body {
-  background: linear-gradient(to right, #4CAF50, #F23645);
-  /* you can replace the colors with your dark-blue / teal mix */
-  min-height: 100vh;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-  .hero img {
-  max-width: 90vw;   /* don’t overflow horizontally */
-  max-height: 90vh;  /* don’t overflow vertically */
-  height: auto;
-  width: auto;
-}
-  h1{
-    colour: Blue;
-    align-items: center;
-</style></head><br>
-<body>
-  <div class="hero">
-    <img src="images/background image 1.jpg" alt="Trading with code">
-  </div><br>
-  
- <h1>Coming Soon ......</h1> </body>
-</HTML>
+---
+layout: default
+title: Home
+---
+
+<section class="hero">
+  <div class="intro">
+    <h1>{{ site.title }}</h1>
+    <p>{{ site.description }}</p>
+    <p><a class="btn" href="#services">See services</a></p>
+  </div>
+  <div>
+    <blockquote class="hero-quote">"Trading is not just a profession, it's a way of life. You are either living as a trader or losing as a gambler."</blockquote>
+  </div>
+</section>
+
+<section id="services" class="sections">
+  <h2>Services & Offerings</h2>
+  <div class="services">
+    <div class="service">
+      <h3>Blog</h3>
+      <img class="thumb" src="/assets/images/blog-selected-small.jpg" 
+           srcset="/assets/images/blog-selected-small.jpg 480w, /assets/images/blog-selected.jpg 800w, /assets/images/blog-selected-large.jpg 1200w"
+           sizes="(max-width:600px) 480px, 33vw"
+           loading="lazy"
+           alt="Blog thumbnail">
+      <blockquote class="hero-quote">"A strong mind will lead to success, focus on it with priority."</blockquote>
+      <p>Many excellent authors have shared timeless lessons. I won’t claim to be the definitive theorist, but I’ve lived the same journey you’re on. My posts focus on practical lessons and personal experience to help you navigate the struggles you face today.</p>
+      <p><a class="btn" href="/blog">Read the blog</a></p>
+    </div>
+
+    <div class="service">
+      <img class="thumb" src="/assets/images/tools-selected.jpg" alt="Tools thumbnail">
+      <h3>Tools</h3>
+      <blockquote class="hero-quote">"Everything is easier with tools, here are some to ease your work"</blockquote>
+      <p>Simplicity matters in complex markets. These lightweight tools detect key candle and pattern signals to streamline your analysis. If you discover a new pattern or identifier, submit an image and name — it may be included in a future update.</p>
+      <p><a class="btn" href="/products">Explore tools</a></p>
+    </div>
+
+    <div class="service">
+      <img class="thumb" src="/assets/images/software-selected.jpg" alt="Software thumbnail">
+      <h3>Software</h3>
+      <blockquote class="hero-quote">"Learning from the past to predict the future — that’s what trading is."</blockquote>
+      <p>Our software leverages deep-learning models trained on historical market data and is continuously updated as new data arrives. View the current model, performance summaries, and access options here.</p>
+      <p><a class="btn" href="/products">View products</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="featured" class="sections">
+  <h2>Featured Work</h2>
+  {% if site.posts.size > 0 %}
+    {% assign p = site.posts | first %}
+    <article>
+      <h3><a href="{{ p.url }}">{{ p.title }}</a></h3>
+      <p>{{ p.content | split: "\n\n" | first }}</p>
+    </article>
+  {% else %}
+    <p>No posts yet. Start your first post in the <code>_posts/</code> folder.</p>
+  {% endif %}
+</section>
+
+<section id="contact" class="sections">
+  <h2>Contact</h2>
+  <p>If you want to reach out, email: <a href="mailto:ysirotia2@gmail.com">ysirotia2@gmail.com</a></p>
+</section>
