@@ -28,3 +28,9 @@ permalink: /products/
   </div>
 </div>
 
+<h2>How to connect payments</h2>
+<ol>
+  <li>Create products on Gumroad, Stripe, or another payment provider and copy the product/checkout URLs.</li>
+  <li>Replace the href="#" values above with the provider URLs and add prices as needed.</li>
+  <li>Optionally integrate Stripe Checkout or a payment widget for a smoother checkout flow.</li>
+</ol>

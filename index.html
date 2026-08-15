@@ -7,10 +7,44 @@ title: Home
   <div class="intro">
     <h1>{{ site.title }}</h1>
     <p>{{ site.description }}</p>
+    <p><a class="btn" href="#services">See services</a></p>
   </div>
   <div>
     <blockquote class="hero-quote">"Trading is not just a profession, it's a way of life. You are either living as a trader or losing as a gambler."</blockquote>
   </div>
+</section>
+
+<section id="blog-section" class="sections">
+  <h2>Lessons from market into life</h2>
+  <div class="services">
+    <div class="service">
+      <img class="thumb" src="/assets/images/blog-selected-small.jpg"
+           srcset="/assets/images/blog-selected-small.jpg 480w, /assets/images/blog-selected.jpg 800w, /assets/images/blog-selected-large.jpg 1200w"
+           sizes="(max-width:600px) 480px, 33vw"
+           loading="lazy"
+           alt="Blog thumbnail">
+      <h3>Blog</h3>
+      <blockquote class="hero-quote">"A strong mind will lead to success, focus on it with priority."</blockquote>
+      <p>Many excellent authors have shared timeless lessons. I won’t claim to be the definitive theorist, but I’ve lived the same journey you’re on. My posts focus on practical lessons and personal experience to help you navigate the struggles you face today.</p>
+      <p><a class="btn" href="/blog">Read the blog</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- disclaimer moved to layout for site-wide display -->
+
+<section id="blog" class="sections">
+  <h2>Blog</h2>
+  <article class="blog-intro">
+    <img class="thumb" src="/assets/images/blog-selected-small.jpg" 
+         srcset="/assets/images/blog-selected-small.jpg 480w, /assets/images/blog-selected.jpg 800w, /assets/images/blog-selected-large.jpg 1200w"
+         sizes="(max-width:600px) 480px, 33vw"
+         loading="lazy"
+         alt="Blog thumbnail">
+    <blockquote class="hero-quote">"A strong mind will lead to success, focus on it with priority."</blockquote>
+    <p>Many excellent authors have shared timeless lessons. I won’t claim to be the definitive theorist, but I’ve lived the same journey you’re on. My posts focus on practical lessons and personal experience to help you navigate the struggles you face today.</p>
+    <p><a class="btn" href="/blog">Read the blog</a></p>
+  </article>
 </section>
 
 <section id="services" class="sections">
@@ -48,15 +82,35 @@ title: Home
 
 <section id="featured" class="sections">
   <h2>Featured Work</h2>
-  {% if site.posts.size > 0 %}
-    {% assign p = site.posts | first %}
-    <article>
-      <h3><a href="{{ p.url }}">{{ p.title }}</a></h3>
-      <p>{{ p.content | split: "\n\n" | first }}</p>
-    </article>
-  {% else %}
-    <p>No posts yet. Start your first post in the <code>_posts/</code> folder.</p>
-  {% endif %}
+  <div id="featured-content">
+    <p>Loading most viewed post...</p>
+  </div>
+
+  <script>
+  // Determine most viewed post using CountAPI (namespace: yogeshsirotia).
+  (function(){
+    var posts = [
+      {% for p in site.posts %}
+        { key: '{{ p.slug }}', title: '{{ p.title | escape }}', url: '{{ p.url }}', excerpt: '{{ p.content | split: "\n\n" | first | strip_newlines | escape }}' }{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ];
+    if(!posts.length){ document.getElementById('featured-content').innerHTML = '<p>No posts yet.</p>'; return; }
+    var ns = 'yogeshsirotia';
+    var requests = posts.map(function(p){ return fetch('https://api.countapi.xyz/get/' + ns + '/' + p.key).then(function(r){ return r.json().catch(function(){ return { value: 0 }; }); }).catch(function(){ return { value: 0 }; }).then(function(d){ return { post: p, count: (d && d.value) || 0 }; }); });
+    Promise.all(requests).then(function(results){
+      results.sort(function(a,b){ return b.count - a.count; });
+      var top = results[0];
+      var container = document.getElementById('featured-content');
+      if(!top || !top.post){ container.innerHTML = '<p>No post data available.</p>'; return; }
+      var html = '<article><h3><a href="' + top.post.url + '">' + top.post.title + '</a></h3>' +
+                 '<p>' + top.post.excerpt + '</p>' +
+                 '<p class="muted">Views (approx): ' + top.count + '</p></article>';
+      container.innerHTML = html;
+    }).catch(function(){ document.getElementById('featured-content').innerHTML = '<p>Could not load counts; showing latest post.</p>';
+      // fallback: show latest post (first in posts array)
+      var p = posts[0]; document.getElementById('featured-content').innerHTML = '<article><h3><a href="'+p.url+'">'+p.title+'</a></h3><p>'+p.excerpt+'</p></article>'; });
+  })();
+  </script>
 </section>
 
 <section id="contact" class="sections">

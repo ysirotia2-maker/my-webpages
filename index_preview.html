@@ -9,6 +9,7 @@
   <body>
     <header class="site-header">
       <nav class="nav">
+        <button id="theme-toggle" class="theme-btn" aria-label="Toggle color theme" title="Toggle color theme" data-tooltip="Theme">🌙</button>
         <a href="#">Home</a>
         <a href="products">Products</a>
         <a href="blog">Blog</a>
@@ -16,21 +17,34 @@
       </nav>
     </header>
 
+    <!-- Site-wide disclaimer (preview) -->
+    <div class="global-disclaimer" id="global-disclaimer" data-visible="true">
+      <div class="disclaimer">
+        <strong>Disclaimer:</strong>
+        I am not a registered research analyst or investment advisor. The ideas and observations shared here are personal insights from my experience in markets and life, not professional investment advice. The tools on this site — pattern identification, candle identification, and backtesting utilities — are designed to simplify tasks and aid learning; they are not trade recommendations. Market data and analysis will be at least 30 days old as required under applicable SEBI guidelines. Always do your own research and consult a licensed professional before making financial decisions.
+        <div class="disclaimer-meta">Refer to: <a href="https://www.sebi.gov.in/legal/circulars/may-2026/norms-for-sharing-and-usage-of-price-data-for-educational-purposes_101293.html" target="_blank" rel="noopener">SEBI circular</a> (May 2026)</div>
+        <div style="margin-top:0.5rem">
+          <button id="disclaimer-dismiss" class="btn">Dismiss</button>
+        </div>
+      </div>
+    </div>
+
     <main class="site-main">
 
 <section class="hero">
   <div class="intro">
-    <h1>yogesh sirotia</h1>
-    <p>Thoughts, work, and digital products by Yogesh Sirotia</p>
+    <h1>Yogesh Sirotia</h1>
+    <p>learning the ways of life through trading. Thoughts and digital products for better living. by yogesh sirotia</p>
     <p><a class="btn" href="#services">See services</a></p>
   </div>
   <div>
     <blockquote class="hero-quote">"Trading is not just a profession, it's a way of life. You are either living as a trader or losing as a gambler."</blockquote>
   </div>
 </section>
+  </section>
 
-<section id="services" class="sections">
-  <h2>Services & Offerings</h2>
+<section id="blog-section" class="sections">
+  <h2>Lessons from market into life</h2>
   <div class="services">
     <div class="service">
       <img class="thumb" src="assets/images/blog-selected-small.jpg"
@@ -43,7 +57,12 @@
       <p>Many excellent authors have shared timeless lessons. I won’t claim to be the definitive theorist, but I’ve lived the same journey you’re on. My posts focus on practical lessons and personal experience to help you navigate the struggles you face today.</p>
       <p><a class="btn" href="blog">Read the blog</a></p>
     </div>
+  </div>
+</section>
 
+<section id="services" class="sections">
+  <h2>Services & Offerings</h2>
+  <div class="services">
     <div class="service">
       <img class="thumb" src="assets/images/tools-selected.jpg" alt="Tools thumbnail">
       <h3>Tools</h3>
@@ -61,7 +80,6 @@
     </div>
   </div>
 </section>
-
 
 <section id="featured" class="sections">
   <h2>Featured Work</h2>
@@ -151,6 +169,34 @@
       clearBtn && clearBtn.addEventListener('click', function(){ localStorage.removeItem('blog_audio_pref'); settingsPanel.style.display='none'; settingsBtn.style.display='none'; alert('Blog audio preference cleared.'); });
 
       document.addEventListener('DOMContentLoaded', async function(){ try{ showSettingsIfBlog(); const pref = localStorage.getItem('blog_audio_pref'); const vol = parseFloat(localStorage.getItem('blog_audio_volume')||0.18); if(audio) audio.volume = vol; if(pref === 'on'){ try{ await audio.play(); }catch(e){} } }catch(e){} });
+    })();
+    </script>
+    <script>
+    // Dismissible global disclaimer (preview)
+    (function(){
+      const wrap = document.getElementById('global-disclaimer');
+      const btn = document.getElementById('disclaimer-dismiss');
+      function hide(){ if(!wrap) return; wrap.style.display='none'; try{ localStorage.setItem('disclaimer:dismissed','1'); }catch(e){} }
+      function show(){ if(!wrap) return; wrap.style.display='block'; }
+      try{
+        const dismissed = localStorage.getItem('disclaimer:dismissed');
+        if(dismissed){ hide(); } else { show(); }
+      }catch(e){ /* ignore */ }
+      btn && btn.addEventListener('click', function(){ hide(); });
+    })();
+    </script>
+
+    <script>
+    // Theme control for preview: dark -> light -> system cycle
+    (function(){
+      const btn = document.getElementById('theme-toggle');
+      const root = document.documentElement;
+      let mq = null;
+      function setIcon(mode){ if(!btn) return; if(mode === 'light') btn.textContent = '☀️'; else if(mode === 'system') btn.textContent = '\uD83D\uDDA5️'; else btn.textContent = '\uD83C\uDF19'; }
+      function applyMode(mode){ if(mq && mq.removeEventListener){ try{ mq.removeEventListener('change', systemListener); }catch(e){} } if(mode === 'light'){ root.classList.add('theme-light'); } else if(mode === 'dark'){ root.classList.remove('theme-light'); } else if(mode === 'system'){ mq = window.matchMedia('(prefers-color-scheme: light)'); const apply=(e)=>{ if(e.matches) root.classList.add('theme-light'); else root.classList.remove('theme-light'); }; apply(mq); try{ mq.addEventListener('change', apply); }catch(e){ try{ mq.addListener(apply); }catch(e){} } } setIcon(mode); try{ localStorage.setItem('site_theme', mode); }catch(e){} }
+      function systemListener(){}
+      try{ const stored = localStorage.getItem('site_theme'); if(stored === 'system') applyMode('system'); else if(stored === 'light') applyMode('light'); else if(stored === 'dark') applyMode('dark'); else { if(window.matchMedia) applyMode('system'); else applyMode('dark'); } }catch(e){ applyMode('dark'); }
+      const order=['dark','light','system']; btn && btn.addEventListener('click', function(){ try{ const current = localStorage.getItem('site_theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'system' : 'dark'); const idx = order.indexOf(current); const next = order[(idx+1)%order.length]; applyMode(next); }catch(e){ applyMode('dark'); } });
     })();
     </script>
 
