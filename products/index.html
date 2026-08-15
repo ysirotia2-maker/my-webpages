@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Products</title>
+    <meta name="description" content="learning the ways of life through trading. Thoughts and digital products for better living. by yogesh sirotia">
+    <meta property="og:title" content="Products">
+    <meta property="og:description" content="learning the ways of life through trading. Thoughts and digital products for better living. by yogesh sirotia">
+    <meta property="og:image" content="https://yogeshsirotia.in">
+    <meta property="og:url" content="https://yogeshsirotia.in/products/">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Products">
+    <meta name="twitter:description" content="learning the ways of life through trading. Thoughts and digital products for better living. by yogesh sirotia">
+    <meta name="twitter:image" content="https://yogeshsirotia.in">
+    <link rel="stylesheet" href="/assets/css/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="/products">Products</a>
+        <a href="/blog">Blog</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <!-- Blog audio and settings (handled by JS). Audio file is placed at assets/audio/ambient.mp3 (small sample silent file included) -->
+    <audio id="blog-audio" loop preload="auto" src="/assets/audio/ambient.mp3"></audio>
+
+    <!-- Prompt modal shown when user clicks a blog link -->
+    <div id="blog-audio-modal" style="display:none;" aria-hidden="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal">
+        <h3>Blog audio preference</h3>
+        <p>Do you want background audio when you open blog pages?</p>
+        <div class="modal-actions">
+          <button id="modal-with-music" class="btn">With music</button>
+          <button id="modal-muted" class="btn">Muted</button>
+        </div>
+        <label class="modal-remember"><input type="checkbox" id="modal-remember" checked> Remember my choice</label>
+      </div>
+    </div>
+
+    <!-- Floating settings for blog pages -->
+    <button id="audio-settings-btn" title="Audio settings" aria-expanded="false" style="display:none">⚙️</button>
+    <div id="audio-settings-panel" style="display:none" aria-hidden="true">
+      <h4>Audio settings</h4>
+      <div>
+        <label><input type="checkbox" id="audio-enabled"> Enable audio</label>
+      </div>
+      <div>
+        <label for="audio-volume">Volume</label>
+        <input id="audio-volume" type="range" min="0" max="1" step="0.01">
+      </div>
+      <div>
+        <button id="audio-play" class="btn">Play</button>
+        <button id="audio-pause" class="btn">Pause</button>
+      </div>
+      <div>
+        <button id="audio-clear" class="btn">Clear saved preference</button>
+      </div>
+    </div>
+
+    <main class="site-main">
+      <h1>Products</h1>
+
+<p>Digital products (no prices or payment links configured yet). When ready, replace the placeholder links with your Gumroad/Stripe/Paddle URLs.</p>
+
+<div class="products-list">
+  <div class="product">
+	<h3>Candle Identifier</h3>
+	<p>A very simple tool to identify what candle patterns were formed in the market today.</p>
+	<p><a class="btn" href="/products/candle-identifier/">Open tool</a></p>
+  </div>
+
+  <div class="product">
+	<h3>Pattern Identifier</h3>
+	<p>A little complex candle pattern identifier to determine where your patterns are seen today.</p>
+	<p><a class="btn" href="/products/pattern-identifier/">Open tool</a></p>
+  </div>
+
+  <div class="product">
+	<h3>Stock Identifier</h3>
+	<p>Want to know what past holds for a stock you are backtesting, check here.</p>
+	<p><a class="btn" href="/products/stock-identifier/">Open tool</a></p>
+  </div>
+</div>
+
+<h2>How to connect payments</h2>
+<ol>
+  <li>Create products on Gumroad, Stripe, or another payment provider and copy the product/checkout URLs.</li>
+  <li>Replace the href="#" values above with the provider URLs and add prices as needed.</li>
+  <li>Optionally integrate Stripe Checkout or a payment widget for a smoother checkout flow.</li>
+</ol>
+
+    </main>
+
+    <script>
+    // Blog audio preference and settings
+    (function(){
+      const audio = document.getElementById('blog-audio');
+      const modal = document.getElementById('blog-audio-modal');
+      const btnWith = document.getElementById('modal-with-music');
+      const btnMuted = document.getElementById('modal-muted');
+      const rememberEl = document.getElementById('modal-remember');
+      const settingsBtn = document.getElementById('audio-settings-btn');
+      const settingsPanel = document.getElementById('audio-settings-panel');
+      const enabledChk = document.getElementById('audio-enabled');
+      const volRange = document.getElementById('audio-volume');
+      const playBtn = document.getElementById('audio-play');
+      const pauseBtn = document.getElementById('audio-pause');
+      const clearBtn = document.getElementById('audio-clear');
+
+      function isBlogHref(h){
+        try{ const u = new URL(h, location.href); return u.pathname.indexOf('/blog') === 0; }catch(e){return false}
+      }
+
+      // Intercept clicks to blog links and show modal
+      document.addEventListener('click', function(e){
+        const a = e.target.closest && e.target.closest('a');
+        if(!a) return;
+        const href = a.getAttribute('href') || a.href;
+        if(!href) return;
+        if(isBlogHref(href)){
+          // if user already has a saved preference, do normal navigation
+          const pref = localStorage.getItem('blog_audio_pref');
+          if(pref){ return; }
+          e.preventDefault();
+          modal.style.display = 'flex';
+          modal.setAttribute('aria-hidden','false');
+          // store target to navigate later
+          modal.dataset.target = href;
+        }
+      }, true);
+
+      function closeModal(){ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); modal.dataset.target=''; }
+
+      async function handleChoice(choice){
+        const target = modal.dataset.target || '/blog';
+        if(rememberEl && rememberEl.checked){ localStorage.setItem('blog_audio_pref', choice); }
+        // apply immediately for current navigation
+        try{
+          if(choice === 'on'){
+            audio.muted = false;
+            const vol = parseFloat(localStorage.getItem('blog_audio_volume')||0.18);
+            audio.volume = vol;
+            await audio.play();
+          } else {
+            audio.pause();
+            audio.currentTime = 0;
+          }
+        }catch(err){ /* play may be blocked */ }
+        closeModal();
+        // navigate
+        window.location = target;
+      }
+
+      btnWith && btnWith.addEventListener('click', function(){ handleChoice('on'); });
+      btnMuted && btnMuted.addEventListener('click', function(){ handleChoice('muted'); });
+
+      // Settings panel behavior
+      function showSettingsIfBlog(){ if(location.pathname.indexOf('/blog') === 0 || location.pathname.indexOf('/blog/') === 0){ settingsBtn.style.display='block'; settingsPanel.style.display='none'; settingsBtn.setAttribute('aria-expanded','false'); } else { settingsBtn.style.display='none'; settingsPanel.style.display='none'; } }
+      showSettingsIfBlog();
+
+      settingsBtn && settingsBtn.addEventListener('click', function(){ const expanded = settingsBtn.getAttribute('aria-expanded') === 'true'; settingsBtn.setAttribute('aria-expanded', String(!expanded)); settingsPanel.style.display = expanded ? 'none' : 'block'; });
+
+      // initialize controls from storage
+      if(volRange){ volRange.value = localStorage.getItem('blog_audio_volume') || 0.18; }
+      if(enabledChk){
+        const pref = localStorage.getItem('blog_audio_pref');
+        enabledChk.checked = (pref === 'on');
+      }
+
+      volRange && volRange.addEventListener('input', function(){ const v = parseFloat(this.value); if(audio) audio.volume = v; localStorage.setItem('blog_audio_volume', v); });
+      playBtn && playBtn.addEventListener('click', async function(){ try{ await audio.play(); enabledChk.checked = true; localStorage.setItem('blog_audio_pref','on'); }catch(e){} });
+      pauseBtn && pauseBtn.addEventListener('click', function(){ audio.pause(); enabledChk.checked = false; localStorage.setItem('blog_audio_pref','muted'); });
+      clearBtn && clearBtn.addEventListener('click', function(){ localStorage.removeItem('blog_audio_pref'); settingsPanel.style.display='none'; settingsBtn.style.display='none'; alert('Blog audio preference cleared.'); });
+
+      // On blog page load, apply preference
+      document.addEventListener('DOMContentLoaded', async function(){
+        try{
+          showSettingsIfBlog();
+          const pref = localStorage.getItem('blog_audio_pref');
+          const vol = parseFloat(localStorage.getItem('blog_audio_volume')||0.18);
+          if(audio) audio.volume = vol;
+          if(pref === 'on'){
+            // try to play (may be blocked without gesture)
+            try{ await audio.play(); }catch(e){}
+          }
+        }catch(e){}
+      });
+    })();
+    </script>
+
+    <footer class="site-footer">
+      <p>&copy; 2026 Yogesh Sirotia</p>
+    </footer>
+  </body>
+</html>
