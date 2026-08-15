@@ -21,9 +21,13 @@ jobs:
           gem install bundler jekyll
           if [ -f Gemfile ]; then bundle install --jobs 4 --retry 3; fi
 
-      - name: Build site with Jekyll
+      - name: Build site with Jekyll (via Bundler)
         run: |
-          jekyll build --destination _site
+          if [ -f Gemfile ]; then
+            bundle exec jekyll build --destination _site
+          else
+            jekyll build --destination _site
+          fi
 
       - name: Deploy to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v3
