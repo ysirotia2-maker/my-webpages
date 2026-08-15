@@ -1,0 +1,11 @@
+# Ignore Visual Studio workspace and temporary files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build / output
+# OS files
+# Node / Python / runtime
+# Logs
