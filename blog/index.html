@@ -19,7 +19,7 @@
   <body>
     <header class="site-header">
       <nav class="nav">
-        <button id="theme-toggle" class="theme-btn" aria-label="Toggle color theme" title="Toggle color theme" data-tooltip="Theme">🌙</button>
+        <button id="theme-toggle" type="button" class="theme-btn" aria-label="Toggle color theme" title="Toggle color theme" data-tooltip="Theme">🌙</button>
         <a href="/">Home</a>
         <a href="/products">Products</a>
         <a href="/blog">Blog</a>
@@ -207,19 +207,66 @@ I have experienced the worst of markets and life, I understand how difficult it 
 
     // Theme toggle: cycles dark -> light -> system
     (function(){
-      try{
-        const btn = document.getElementById('theme-toggle');
-        const root = document.documentElement;
-        let mq, systemListener;
-        function applyMode(mode){
-          try{ if(mq && mq.removeEventListener){ mq.removeEventListener('change', systemListener); } }catch(e){}
-          if(mode === 'light'){ root.classList.add('theme-light'); }
-          else if(mode === 'dark'){ root.classList.remove('theme-light'); }
-          else if(mode === 'system'){ mq = window.matchMedia('(prefers-color-scheme: light)'); const apply=(e)=>{ if(e.matches) root.classList.add('theme-light'); else root.classList.remove('theme-light'); }; apply(mq); systemListener = function(e){ apply(e); }; try{ mq.addEventListener('change', systemListener); }catch(e){ try{ mq.addListener(systemListener); }catch(ex){} } }
-        }
-        try{ const stored = localStorage.getItem('site_theme'); if(stored === 'system') applyMode('system'); else if(stored === 'light') applyMode('light'); else if(stored === 'dark') applyMode('dark'); else { if(window.matchMedia) applyMode('system'); else applyMode('dark'); } }catch(e){ applyMode('dark'); }
-        const order=['dark','light','system']; btn && btn.addEventListener('click', function(){ try{ const current = localStorage.getItem('site_theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'system' : 'dark'); const idx = order.indexOf(current); const next = order[(idx+1)%order.length]; localStorage.setItem('site_theme', next); applyMode(next); }catch(e){ applyMode('dark'); } });
-      }catch(e){}
+      function initThemeControls(){
+        try{
+          const btn = document.getElementById('theme-toggle');
+          const root = document.documentElement;
+          let mq = null, systemListener = null;
+
+          function setButtonIcon(mode){
+            if(!btn) return;
+            if(mode === 'light') btn.textContent = '☀️';
+            else if(mode === 'dark') btn.textContent = '🌙';
+            else btn.textContent = '🖥️';
+          }
+
+          function applyMode(mode){
+            // remove previous system listener if any
+            try{ if(mq && systemListener){ if(mq.removeEventListener) mq.removeEventListener('change', systemListener); else mq.removeListener && mq.removeListener(systemListener); } }catch(e){}
+
+            if(mode === 'light'){
+              root.classList.add('theme-light');
+            } else if(mode === 'dark'){
+              root.classList.remove('theme-light');
+            } else if(mode === 'system'){
+              mq = window.matchMedia('(prefers-color-scheme: light)');
+              const applyPref = function(e){
+                // if system prefers light -> enable theme-light, else remove
+                const matches = (e && typeof e.matches === 'boolean') ? e.matches : mq.matches;
+                if(matches) root.classList.add('theme-light'); else root.classList.remove('theme-light');
+              };
+              applyPref(mq);
+              systemListener = applyPref;
+              try{ if(mq.addEventListener) mq.addEventListener('change', systemListener); else mq.addListener && mq.addListener(systemListener); }catch(e){}
+            }
+            setButtonIcon(mode);
+          }
+
+          // initial mode
+          try{
+            const stored = localStorage.getItem('site_theme');
+            if(stored === 'light' || stored === 'dark' || stored === 'system'){
+              applyMode(stored);
+            } else {
+              // no stored preference: prefer 'system' when available
+              if(window.matchMedia) applyMode('system'); else applyMode('dark');
+            }
+          }catch(e){ applyMode('dark'); }
+
+          const order = ['dark','light','system'];
+          if(btn) btn.addEventListener('click', function(){
+            try{
+              const current = localStorage.getItem('site_theme') || (window.matchMedia ? 'system' : 'dark');
+              const idx = order.indexOf(current);
+              const next = order[(idx + 1) % order.length];
+              localStorage.setItem('site_theme', next);
+              applyMode(next);
+            }catch(e){ applyMode('dark'); }
+          });
+        }catch(e){ console && console.error && console.error('theme init failed', e); }
+      }
+
+      if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initThemeControls); else initThemeControls();
     })();
     </script>
 
