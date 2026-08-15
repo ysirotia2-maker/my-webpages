@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Debug: GH_PAGES_PAT presence
+      - name: "Debug: GH_PAGES_PAT presence"
         run: |
           if [ -z "${{ secrets.GH_PAGES_PAT }}" ]; then
             echo "GH_PAGES_PAT is NOT set"
