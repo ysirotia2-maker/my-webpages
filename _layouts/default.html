@@ -86,7 +86,7 @@
     (function(){
       try{
         var ns = 'yogeshsirotia';
-        var key = 'post-' + '{{ page.url | slugify }}';
+        var key = '{{ page.slug | default: page.url | slugify }}';
         // Hit the counter (increment)
         fetch('https://api.countapi.xyz/hit/' + ns + '/' + key).then(function(res){ return res.json(); }).then(function(d){
           // option: expose count on window for debugging
