@@ -72,9 +72,16 @@ async function initDateRunner(){
 
 	try{
 	  statusEl.textContent = 'Loading tool into Python...';
-	  const toolResp = await fetch('/tools/candle_date_identifier.py');
-	  const toolSource = await toolResp.text();
-	  pyodide.runPython(toolSource);
+		try{
+		const toolResp = await fetch('/tools/candle_date_identifier.py');
+		if(!toolResp.ok) throw new Error('Tool fetch returned ' + toolResp.status);
+		const toolSource = await toolResp.text();
+		pyodide.runPython(toolSource);
+	  }catch(fetchErr){
+		resultsEl.innerHTML = '<p style="color:#900">Could not load tool source: '+fetchErr.message+'</p>';
+		statusEl.textContent = 'Tool load failed';
+		return;
+	  }
 	  const wrapper = `import io,csv,json
 from collections import defaultdict
 def analyze_text(csv_text):
@@ -112,8 +119,19 @@ def analyze_text(csv_text):
 		result[ctype].append(date)
 	return json.dumps(result)
 `;
-	  pyodide.runPython(wrapper);
+		pyodide.runPython(wrapper);
 	  pyodide.globals.set('csv_text', text);
+
+	  // Validation: ensure required columns present in header
+	  const headerLine = text.split('\n')[0] || '';
+	  const headerCols = headerLine.split(',').map(c=>c.trim().toLowerCase());
+	  const required = ['date','open','high','low','close'];
+	  const missing = required.filter(r=>headerCols.indexOf(r) === -1);
+	  if(missing.length){
+		resultsEl.innerHTML = '<p style="color:#900">Missing required columns: '+missing.join(', ')+'</p>';
+		statusEl.textContent = 'Validation failed';
+		return;
+	  }
 	  statusEl.textContent = 'Analyzing...';
 	  const jsonStr = await pyodide.runPythonAsync('analyze_text(csv_text)');
 	  const obj = JSON.parse(jsonStr);
