@@ -9,10 +9,7 @@ permalink: /products/day-candle-identifier/
 
 <blockquote class="hero-quote">"Everything is easier with tools, here are some to ease your work"</blockquote>
 
-<p><strong>Will be available soon.</strong> You can run this locally using <code>tools/day_candle_identifier.py</code>:</p>
-<pre><code>python tools/day_candle_identifier.py path/to/today_snapshot.csv</code></pre>
-
-<p>Output will list candle types and matching symbols. When the online runner is available you'll be able to upload a CSV and see a formatted table.</p>
+<p>Output lists candle types and matching symbols for the provided CSV.</p>
 
 <hr />
 <h2>Try it in your browser</h2>
