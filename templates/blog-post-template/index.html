@@ -3,17 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Candle Date Identifier</title>
-    <meta name="description" content="learning the ways of life through trading. Thoughts and digital products for better living. by yogesh sirotia">
-    <meta property="og:title" content="Candle Date Identifier">
-    <meta property="og:description" content="learning the ways of life through trading. Thoughts and digital products for better living. by yogesh sirotia">
-    <meta property="og:image" content="https://yogeshsirotia.in">
-    <meta property="og:url" content="https://yogeshsirotia.in/products/candle-date-identifier/">
+    <title>Your post title here</title>
+    <meta name="description" content="Optional longer description for social cards">
+    <meta property="og:title" content="Optional social title">
+    <meta property="og:description" content="Optional longer description for social cards">
+    <meta property="og:image" content="https://yogeshsirotia.in/assets/images/feature-image.jpg">
+    <meta property="og:url" content="https://yogeshsirotia.in/templates/blog-post-template/">
     <meta property="og:type" content="article">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Candle Date Identifier">
-    <meta name="twitter:description" content="learning the ways of life through trading. Thoughts and digital products for better living. by yogesh sirotia">
-    <meta name="twitter:image" content="https://yogeshsirotia.in">
+    <meta name="twitter:title" content="Optional social title">
+    <meta name="twitter:description" content="Optional longer description for social cards">
+    <meta name="twitter:image" content="https://yogeshsirotia.in/assets/images/feature-image.jpg">
     <link rel="stylesheet" href="/assets/css/styles.css">
   </head>
   <body>
@@ -77,166 +77,47 @@
     </div>
 
     <main class="site-main">
-      <h1>Candle Date Identifier</h1>
-<p>A tool that analyzes multi-year series CSV files (date,open,high,low,close,volume,turnover) and returns dates where selected candle types appear. The online runner will accept an uploaded CSV and produce a table with candle types as column headers and the dates listed underneath.</p>
+      <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
 
-<blockquote class="hero-quote">"Sometimes the simplest things points to the biggest changes"</blockquote>
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Your post title here</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2026-09-11T04:30:00+00:00" itemprop="datePublished">Sep 11, 2026
+      </time></p>
+  </header>
 
-<p>Output lists candle types and matching dates for the provided CSV.</p>
+  <div class="post-content e-content" itemprop="articleBody">
+    <!-- Write your post content in Markdown below this line. -->
 
-<hr />
+<p>Start writing here. Use headings, code blocks, images, and normal Markdown formatting.</p>
 
-<h2>Try it in your browser</h2>
-<p>Upload a CSV with columns: <code>date,open,high,low,close,volume,turnover</code></p>
-<p><input id="cd-upload" type="file" accept=".csv" />
-<button id="cd-run" class="btn">Run</button></p>
-<div id="cd-status" class="muted" style="margin-top:0.5rem"></div>
-<div id="cd-results" style="margin-top:1rem;overflow:auto"></div>
+<ul>
+  <li>Keep the excerpt short (one sentence).</li>
+  <li>Use the ‘image’ property above to set the social card image.</li>
+</ul>
 
-<div style="margin-top:0.5rem">
-  <button id="cd-download" class="btn">Download CSV template</button>
-  <label style="margin-left:1rem">or paste CSV below:</label>
-  <br />
-  <textarea id="cd-paste" rows="5" style="width:100%;margin-top:0.5rem" placeholder="date,open,high,low,close,volume,turnover\n"></textarea>
-</div>
+<!-- End of template -->
 
-<script>
-// Refactored runner: load the actual tool source into pyodide and run a small wrapper
-async function initDateRunner(){
-  const runBtn = document.getElementById('cd-run');
-  const statusEl = document.getElementById('cd-status');
-  const resultsEl = document.getElementById('cd-results');
-  const downloadBtn = document.getElementById('cd-download');
-  const pasteArea = document.getElementById('cd-paste');
-  let pyodide = null;
-
-  async function ensurePy(){
-	if(pyodide) return pyodide;
-	statusEl.textContent = 'Loading Python runtime (pyodide)...';
-	pyodide = await loadPyodide({indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/'});
-	statusEl.textContent = 'Ready';
-	return pyodide;
-  }
-
-  downloadBtn.addEventListener('click', function(){
-	const header = 'date,open,high,low,close,volume,turnover\n';
-	const example = '2026-08-20,100,110,98,108,100000,1000000\n';
-	const blob = new Blob([header+example], {type: 'text/csv'});
-	const url = URL.createObjectURL(blob);
-	const a = document.createElement('a');
-	a.href = url; a.download = 'historical-template.csv'; document.body.appendChild(a); a.click(); a.remove();
-	URL.revokeObjectURL(url);
-  });
-
-  runBtn.addEventListener('click', async function(){
-	const f = document.getElementById('cd-upload').files[0];
-	let text = '';
-	if(f){
-	  statusEl.textContent = 'Reading file...';
-	  text = await f.text();
-	} else if(pasteArea.value && pasteArea.value.trim().length>0){
-	  text = pasteArea.value.trim();
-	} else { alert('Select a CSV file or paste CSV into the box'); return; }
-
-	statusEl.textContent = 'Previewing...';
-	const preview = text.split('\n').slice(0,6).join('\n');
-	resultsEl.innerHTML = '<pre style="white-space:pre-wrap">' + preview + '</pre>';
-
-	await ensurePy();
-
-	try{
-	  statusEl.textContent = 'Loading tool into Python...';
-		try{
-		const toolResp = await fetch('/tools/candle_date_identifier.py');
-		if(!toolResp.ok) throw new Error('Tool fetch returned ' + toolResp.status);
-		const toolSource = await toolResp.text();
-		pyodide.runPython(toolSource);
-	  }catch(fetchErr){
-		resultsEl.innerHTML = '<p style="color:#900">Could not load tool source: '+fetchErr.message+'</p>';
-		statusEl.textContent = 'Tool load failed';
-		return;
-	  }
-	  const wrapper = `import io,csv,json
-from collections import defaultdict
-def analyze_text(csv_text):
-	f = io.StringIO(csv_text)
-	reader = csv.reader(f)
-	header = next(reader, None)
-	result = defaultdict(list)
-	for r in reader:
-		if not r or len(r) < 5:
-			continue
-		date = r[0]
-		try:
-			open_p = float(r[1]); high_p = float(r[2]); low_p = float(r[3]); close_p = float(r[4])
-		except Exception:
-			continue
-		max_change = high_p - low_p
-		body_size = abs(close_p - open_p)
-		close_height = close_p - low_p
-		if max_change == 0:
-			ctype = 'undefined'
-		elif body_size < 0.1 * max_change:
-			if close_height < 0.3 * max_change:
-				ctype = 'shooting star'
-			elif close_height > 0.7 * max_change:
-				ctype = 'hammer candle'
-			else:
-				ctype = 'doji candle'
-		elif body_size > 0.9 * max_change:
-			if close_p > open_p:
-				ctype = 'bullish maribozu'
-			else:
-				ctype = 'bearish maribozu'
-		else:
-			ctype = 'undefined'
-		result[ctype].append(date)
-	return json.dumps(result)
-`;
-		pyodide.runPython(wrapper);
-	  pyodide.globals.set('csv_text', text);
-
-	  // Validation: ensure required columns present in header
-	  const headerLine = text.split('\n')[0] || '';
-	  const headerCols = headerLine.split(',').map(c=>c.trim().toLowerCase());
-	  const required = ['date','open','high','low','close'];
-	  const missing = required.filter(r=>headerCols.indexOf(r) === -1);
-	  if(missing.length){
-		resultsEl.innerHTML = '<p style="color:#900">Missing required columns: '+missing.join(', ')+'</p>';
-		statusEl.textContent = 'Validation failed';
-		return;
-	  }
-	  statusEl.textContent = 'Analyzing...';
-	  const jsonStr = await pyodide.runPythonAsync('analyze_text(csv_text)');
-	  const obj = JSON.parse(jsonStr);
-	  const keys = Object.keys(obj);
-	  if(keys.length === 0){ resultsEl.innerHTML = '<p>No results</p>'; statusEl.textContent='Done'; return; }
-	  const maxLen = Math.max(...keys.map(k=>obj[k].length));
-	  let html = '<table class="products-list" style="width:100%;border-collapse:collapse"><thead><tr>';
-	  for(const k of keys) html += '<th style="text-align:left;padding:6px;border-bottom:1px solid #ddd">'+k+'</th>';
-	  html += '</tr></thead><tbody>';
-	  for(let i=0;i<maxLen;i++){
-		html += '<tr>';
-		for(const k of keys){ html += '<td style="padding:6px;border-bottom:1px solid #eee">'+(obj[k][i]||'')+'</td>'; }
-		html += '</tr>';
-	  }
-	  html += '</tbody></table>';
-	  resultsEl.innerHTML = html;
-	  statusEl.textContent = 'Done';
-	}catch(err){ statusEl.textContent = 'Error: '+err; console.error(err); }
-  });
-}
-
-if(typeof loadPyodide === 'undefined'){
-  const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js';
-  s.onload = initDateRunner; document.head.appendChild(s);
-} else { initDateRunner(); }
-</script>
-
+  </div><a class="u-url" href="/templates/blog-post-template/" hidden></a>
+</article>
 
     </main>
 
+    
+    <script>
+    // Increment view counter for posts using CountAPI
+    (function(){
+      try{
+        var ns = 'yogeshsirotia';
+        var key = 'templates-blog-post-template';
+        // Hit the counter (increment)
+        fetch('https://api.countapi.xyz/hit/' + ns + '/' + key).then(function(res){ return res.json(); }).then(function(d){
+          // option: expose count on window for debugging
+          try{ window.__post_view_count = d && d.value; }catch(e){}
+        }).catch(function(e){ console && console.warn && console.warn('countapi hit failed', e); });
+      }catch(e){ console && console.warn && console.warn('countapi setup failed', e); }
+    })();
+    </script>
     
 
     <script>

@@ -148,10 +148,17 @@ async function initDayRunner(){
 	try{
 	  statusEl.textContent = 'Loading tool into Python...';
 	  // fetch the tool source from the site so we are using the repository's canonical code
-	  const toolResp = await fetch('/tools/day_candle_identifier.py');
-	  const toolSource = await toolResp.text();
-	  // execute tool source in pyodide global scope (for reference)
-	  pyodide.runPython(toolSource);
+		try{
+		const toolResp = await fetch('/tools/day_candle_identifier.py');
+		if(!toolResp.ok) throw new Error('Tool fetch returned ' + toolResp.status);
+		const toolSource = await toolResp.text();
+		// execute tool source in pyodide global scope (for reference)
+		pyodide.runPython(toolSource);
+	  }catch(fetchErr){
+		resultsEl.innerHTML = '<p style="color:#900">Could not load tool source: '+fetchErr.message+'</p>';
+		statusEl.textContent = 'Tool load failed';
+		return;
+	  }
 
 	  // wrapper function that accepts CSV text and returns JSON results
 	  const wrapper = `import io,csv,json
@@ -191,8 +198,19 @@ def analyze_text(csv_text):
 		result[ctype].append(name)
 	return json.dumps(result)
 `;
-	  pyodide.runPython(wrapper);
+		pyodide.runPython(wrapper);
 	  pyodide.globals.set('csv_text', text);
+
+	  // Validation: ensure required columns present in header
+	  const headerLine = text.split('\n')[0] || '';
+	  const headerCols = headerLine.split(',').map(c=>c.trim().toLowerCase());
+	  const required = ['name','open','high','low','close'];
+	  const missing = required.filter(r=>headerCols.indexOf(r) === -1);
+	  if(missing.length){
+		resultsEl.innerHTML = '<p style="color:#900">Missing required columns: '+missing.join(', ')+'</p>';
+		statusEl.textContent = 'Validation failed';
+		return;
+	  }
 	  statusEl.textContent = 'Analyzing...';
 	  const jsonStr = await pyodide.runPythonAsync('analyze_text(csv_text)');
 	  const obj = JSON.parse(jsonStr);
