@@ -162,10 +162,43 @@
       var container = document.getElementById('featured-content');
       if(!top || !top.post){ container.innerHTML = '<p>No post data available.</p>'; return; }
       var countDisplay = (typeof top.count === 'number' && top.count > 0) ? top.count : '—';
-      var html = '<article><h3><a href="' + top.post.url + '">' + top.post.title + '</a></h3>' +
-                 '<p>' + top.post.excerpt + '</p>' +
-                 '<p class="muted">Views (approx): ' + countDisplay + '</p></article>';
-      container.innerHTML = html;
+
+      // Fetch the post HTML and extract the first meaningful paragraph (exclude code blocks)
+      fetch(top.post.url).then(function(r){ return r.text(); }).then(function(htmlText){
+        try{
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(htmlText, 'text/html');
+          var paragraphs = doc.querySelectorAll('p');
+          var excerptText = '';
+          for(var i=0;i<paragraphs.length;i++){
+            var p = paragraphs[i];
+            var txt = (p.textContent || '').trim();
+            if(!txt) continue;
+            // skip paragraphs that appear to be code or contain inline code elements
+            if(p.querySelector('code') || p.closest('pre') || txt.indexOf('```') !== -1) continue;
+            // skip short captions or meta lines
+            if(txt.length < 30) continue;
+            excerptText = txt; break;
+          }
+          if(!excerptText){ // fallback to a short cleaned excerpt
+            excerptText = (top.post.excerpt || '').replace(/```/g,'').replace(/`/g,'');
+          }
+          var safeExcerpt = excerptText;
+          var html = '<article><h3><a href="' + top.post.url + '">' + top.post.title + '</a></h3>' +
+                     '<p>' + safeExcerpt + '</p>' +
+                     '<p class="muted">Views (approx): ' + countDisplay + '</p></article>';
+          container.innerHTML = html;
+        }catch(e){
+          container.innerHTML = '<article><h3><a href="' + top.post.url + '">' + top.post.title + '</a></h3>' +
+                     '<p>' + (top.post.excerpt || '') + '</p>' +
+                     '<p class="muted">Views (approx): ' + countDisplay + '</p></article>';
+        }
+      }).catch(function(){
+        // if fetching post failed, fallback to post.excerpt
+        container.innerHTML = '<article><h3><a href="' + top.post.url + '">' + top.post.title + '</a></h3>' +
+                   '<p>' + (top.post.excerpt || '') + '</p>' +
+                   '<p class="muted">Views (approx): ' + countDisplay + '</p></article>';
+      });
     }).catch(function(){
       var container = document.getElementById('featured-content');
       container.innerHTML = '<p>Could not load counts; showing latest post.</p>';
