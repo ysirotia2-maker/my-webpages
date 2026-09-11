@@ -79,13 +79,17 @@ title: Home
       var top = results[0];
       var container = document.getElementById('featured-content');
       if(!top || !top.post){ container.innerHTML = '<p>No post data available.</p>'; return; }
+      var countDisplay = (typeof top.count === 'number' && top.count > 0) ? top.count : '—';
       var html = '<article><h3><a href="' + top.post.url + '">' + top.post.title + '</a></h3>' +
                  '<p>' + top.post.excerpt + '</p>' +
-                 '<p class="muted">Views (approx): ' + top.count + '</p></article>';
+                 '<p class="muted">Views (approx): ' + countDisplay + '</p></article>';
       container.innerHTML = html;
-    }).catch(function(){ document.getElementById('featured-content').innerHTML = '<p>Could not load counts; showing latest post.</p>';
+    }).catch(function(){
+      var container = document.getElementById('featured-content');
+      container.innerHTML = '<p>Could not load counts; showing latest post.</p>';
       // fallback: show latest post (first in posts array)
-      var p = posts[0]; document.getElementById('featured-content').innerHTML = '<article><h3><a href="'+p.url+'">'+p.title+'</a></h3><p>'+p.excerpt+'</p></article>'; });
+      var p = posts[0]; container.innerHTML = '<article><h3><a href="'+p.url+'">'+p.title+'</a></h3><p>'+p.excerpt+'</p><p class="muted">Views (approx): —</p></article>';
+    });
   })();
   </script>
 </section>

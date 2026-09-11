@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ---
 layout: post
 title: "The Bollinger Bands of Life: Finding Growth Beyond the Comfort Zone"
@@ -64,4 +65,6 @@ To get something big, you must risk losing big. The fear of stepping past your o
 
 
 
+
+>>>>>>> 72979e2 (Add tools: converted notebooks, CLI scripts and product pages)
 The width of your bands is up to you. You can stay safely centered, or you can dare to test the edges, embrace the friction, and let the experience elevate your entire chart.
