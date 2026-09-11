@@ -6,3 +6,6 @@ url: "https://yogeshsirotia.in" # the full URL for your custom domain
 theme: minima
 markdown: kramdown
 permalink: /:categories/:year/:month/:day/:title/
+
+include:
+  - "tools"
