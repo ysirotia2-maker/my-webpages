@@ -8,6 +8,7 @@ and returns, per candle type, the stock names/dates.
 """
 import csv
 import sys
+import io
 from collections import defaultdict
 
 def analyze_file(path):
@@ -59,13 +60,60 @@ def analyze_file(path):
 def main():
     if len(sys.argv) < 2:
         print('Usage: python day_candle_identifier.py <csv-file>')
-        sys.exit(1)
+        return
     path = sys.argv[1]
     res = analyze_file(path)
     for k, v in res.items():
         print(f"{k}: {len(v)} entries")
         for d in v:
             print(f"  {d}")
+
+
+def analyze_text(csv_text):
+    """Analyze CSV content provided as text and return the same dict mapping."""
+    rows = []
+    f = io.StringIO(csv_text)
+    reader = csv.reader(f)
+    header = next(reader, None)
+    for r in reader:
+        if not r or len(r) < 6:
+            continue
+        rows.append(r)
+
+    result = defaultdict(list)
+    for r in rows:
+        name = r[0]
+        try:
+            open_p = float(r[1])
+            high_p = float(r[2])
+            low_p = float(r[3])
+            close_p = float(r[4])
+        except Exception:
+            continue
+        max_change = high_p - low_p
+        body_size = abs(close_p - open_p)
+        close_height = close_p - low_p
+
+        if max_change == 0:
+            ctype = 'undefined'
+        elif body_size < 0.1 * max_change:
+            if close_height < 0.3 * max_change:
+                ctype = 'shooting star'
+            elif close_height > 0.7 * max_change:
+                ctype = 'hammer candle'
+            else:
+                ctype = 'doji candle'
+        elif body_size > 0.9 * max_change:
+            if close_p > open_p:
+                ctype = 'bullish maribozu'
+            else:
+                ctype = 'bearish maribozu'
+        else:
+            ctype = 'undefined'
+
+        result[ctype].append(name)
+
+    return dict(result)
 
 
 if __name__ == '__main__':
